@@ -1,4 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+
+import 'keypad.dart';
 
 void main() => runApp(const MyApp());
 
@@ -9,58 +13,116 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: appTitle,
-      home: MyHomePage(title: appTitle),
+      home: MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
 
-  final String title;
+class _MyHomePageState extends State<MyHomePage> {
+  TextEditingController pinController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: const Center(
-        child: Text('My Page!'),
+      appBar: AppBar(
+        title: Text('CODE UNLOCK'),
+        backgroundColor: Colors.blue,
       ),
-      drawer: Drawer(
-       
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
+      body: Builder(
+        builder: (context) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(bottom: 20),
+                child: Text(
+                  "displayCode",
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 50,
+                      fontWeight: FontWeight.bold
+                      // fontFamily: AppTextStyle.robotoBold
+                      ),
+                ),
               ),
-              child: Text('items '),
-            ),
-            ListTile(
-              title: const Text('Item 1'),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Item 2'),
-              onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
-                Navigator.pop(context);
-              },
-            ),
-          ],
+              Padding(
+                padding: EdgeInsets.only(left: 50, right: 50, bottom: 15),
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.orangeAccent,
+                      border:
+                          Border.all(color: Colors.orangeAccent, width: 1.5)),
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 15),
+                    child: TextField(
+                      controller: pinController,
+                      readOnly: true,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 26,
+                        // fontWeight: FontWeight.bold
+                        // fontFamily: AppTextStyle.robotoBold
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Enter PIN',
+                      ),
+                      // controller: userDisplayName,
+                    ),
+                  ),
+                ),
+              ),
+              KeyPad(
+                pinController: pinController,
+                isPinLogin: false,
+                onChange: (String pin) {
+                  pinController.text = pin;
+                  print('${pinController.text}');
+                },
+                onSubmit: (String pin) {
+                  if (pin.length != 4) {
+                    (pin.length == 0)
+                        ? showInSnackBar('Please Enter Pin')
+                        : showInSnackBar('Wrong Pin');
+                    return;
+                  } else {
+                    pinController.text = pin;
+
+                    if (pinController.text == "displayCode") {
+                      showInSnackBar('Pin Match');
+                      setState(() {});
+                    } else {
+                      showInSnackBar('Wrong pin');
+                    }
+                    print('Pin is ${pinController.text}');
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void showInSnackBar(String value) {
+    Scaffold.of(context).showSnackBar(new SnackBar(content: new Text(value)));
+  }
+
+  getNextCode() {
+    pinController.text = '';
+    var rng = new Random();
+    var code = (rng.nextInt(9000) + 1000).toString();
+    print('Random No is : $code');
+    return code;
   }
 }
